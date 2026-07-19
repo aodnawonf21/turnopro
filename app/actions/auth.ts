@@ -4,6 +4,29 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
+async function waitForProfile(userId: string, maxRetries: number = 5): Promise<boolean> {
+  const supabase = await createClient()
+  
+  for (let i = 0; i < maxRetries; i++) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .single()
+    
+    if (data && data.id === userId) {
+      return true
+    }
+    
+    if (i < maxRetries - 1) {
+      // Wait 200ms before retrying
+      await new Promise(resolve => setTimeout(resolve, 200))
+    }
+  }
+  
+  return false
+}
+
 export async function signUp(formData: {
   businessName: string
   email: string
@@ -37,6 +60,12 @@ export async function signUp(formData: {
     .replace(/-+/g, '-')
 
   // Profile is created automatically by Supabase trigger on auth.users insert
+  // Wait for the profile to be created (with retries)
+  const profileExists = await waitForProfile(data.user.id)
+  
+  if (!profileExists) {
+    return { error: 'El perfil no se pudo crear automáticamente. Por favor intenta registrarte nuevamente.' }
+  }
 
   // Create business
   const { error: businessError } = await supabase
