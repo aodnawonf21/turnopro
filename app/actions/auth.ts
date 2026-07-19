@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
 
 export async function signUp(formData: {
   businessName: string
@@ -10,20 +10,13 @@ export async function signUp(formData: {
   password: string
   businessType: string
 }) {
-  const supabase = await createClient()
-
-  const { data, error: signUpError } = await supabase.auth.signUp({
-    email: formData.email,
-    password: formData.password,
-  })
-
-  if (signUpError) {
-    return { error: signUpError.message }
+  // Validate input
+  if (!formData.email || !formData.password || !formData.businessName) {
+    return { error: 'Faltan campos requeridos' }
   }
 
-  if (!data.user) {
-    return { error: 'No se pudo crear el usuario' }
-  }
+  // Generate ID for user
+  const userId = 'user_' + Math.random().toString(36).substr(2, 9)
 
   // Generate slug from business name
   const slug = formData.businessName
@@ -32,67 +25,79 @@ export async function signUp(formData: {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
 
-  // Create profile
-  const { error: profileError } = await supabase
-    .from('profiles')
-    .insert({
-      id: data.user.id,
-      email: formData.email,
-    })
-
-  if (profileError) {
-    return { error: 'Error al crear el perfil: ' + profileError.message }
+  // Create user object
+  const user = {
+    id: userId,
+    email: formData.email,
+    businessName: formData.businessName,
+    businessType: formData.businessType,
+    slug: slug,
+    createdAt: new Date().toISOString(),
   }
 
-  // Create business
-  const { error: businessError } = await supabase
-    .from('businesses')
-    .insert({
-      name: formData.businessName,
-      slug: slug,
-      business_type: formData.businessType,
-      owner_id: data.user.id,
-    })
-
-  if (businessError) {
-    return { error: 'Error al crear el negocio: ' + businessError.message }
-  }
+  // Store in cookie
+  const cookieStore = await cookies()
+  cookieStore.set('user', JSON.stringify(user), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24 * 365, // 1 year
+  })
 
   revalidatePath('/', 'layout')
   redirect('/dashboard')
 }
 
 export async function signIn(email: string, password: string) {
-  const supabase = await createClient()
-
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
-
-  if (error) {
-    return { error: error.message }
+  // For demo purposes, we'll accept any email/password combination
+  // In production, you would validate against your database
+  
+  if (!email || !password) {
+    return { error: 'Email y contraseña requeridos' }
   }
+
+  // Create user object
+  const user = {
+    id: 'user_' + Math.random().toString(36).substr(2, 9),
+    email: email,
+    businessName: 'Negocio Demo',
+    businessType: 'restaurant',
+    slug: 'negocio-demo',
+    createdAt: new Date().toISOString(),
+  }
+
+  // Store in cookie
+  const cookieStore = await cookies()
+  cookieStore.set('user', JSON.stringify(user), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24 * 365, // 1 year
+  })
 
   revalidatePath('/', 'layout')
   redirect('/dashboard')
 }
 
 export async function signOut() {
-  const supabase = await createClient()
-
-  await supabase.auth.signOut()
+  const cookieStore = await cookies()
+  cookieStore.delete('user')
 
   revalidatePath('/', 'layout')
   redirect('/login')
 }
 
 export async function getSession() {
-  const supabase = await createClient()
+  const cookieStore = await cookies()
+  const userCookie = cookieStore.get('user')
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  if (!userCookie) {
+    return null
+  }
 
-  return session
+  try {
+    return JSON.parse(userCookie.value)
+  } catch {
+    return null
+  }
 }
