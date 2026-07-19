@@ -10,6 +10,10 @@ export async function signUp(formData: {
   password: string
   businessType: string
 }) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return { error: 'Supabase no está configurado' }
+  }
+
   const supabase = await createClient()
 
   const { data, error: signUpError } = await supabase.auth.signUp({
@@ -63,6 +67,10 @@ export async function signUp(formData: {
 }
 
 export async function signIn(email: string, password: string) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return { error: 'Supabase no está configurado' }
+  }
+
   const supabase = await createClient()
 
   const { error } = await supabase.auth.signInWithPassword({
@@ -79,6 +87,10 @@ export async function signIn(email: string, password: string) {
 }
 
 export async function signOut() {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    redirect('/login')
+  }
+
   const supabase = await createClient()
 
   await supabase.auth.signOut()
@@ -88,6 +100,10 @@ export async function signOut() {
 }
 
 export async function getSession() {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return null
+  }
+
   const supabase = await createClient()
 
   const {

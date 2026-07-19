@@ -4,9 +4,12 @@ import { getSession } from '@/app/actions/auth';
 import { redirect } from 'next/navigation';
 
 export default async function Home() {
-  const session = await getSession();
-  if (session) {
-    redirect('/dashboard');
+  // Only redirect if Supabase is configured and user has session
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const session = await getSession();
+    if (session) {
+      redirect('/dashboard');
+    }
   }
   return (
     <div className="min-h-screen bg-white">

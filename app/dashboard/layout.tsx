@@ -9,9 +9,12 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getSession();
-  if (!session) {
-    redirect('/login');
+  // Only enforce authentication if Supabase is configured
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const session = await getSession();
+    if (!session) {
+      redirect('/login');
+    }
   }
   return (
     <div className="min-h-screen bg-gray-50 flex">
