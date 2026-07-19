@@ -53,6 +53,13 @@ export default function DashboardLayout({
             Personal
           </Link>
           <Link
+            href="/dashboard/horarios"
+            className="flex items-center gap-3 px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium"
+          >
+            <span className="text-xl">🕐</span>
+            Horarios
+          </Link>
+          <Link
             href="/dashboard/settings"
             className="flex items-center gap-3 px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium"
           >
