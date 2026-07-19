@@ -36,17 +36,7 @@ export async function signUp(formData: {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
 
-  // Create profile
-  const { error: profileError } = await supabase
-    .from('profiles')
-    .insert({
-      id: data.user.id,
-      email: formData.email,
-    })
-
-  if (profileError) {
-    return { error: 'Error al crear el perfil: ' + profileError.message }
-  }
+  // Profile is created automatically by Supabase trigger on auth.users insert
 
   // Create business
   const { error: businessError } = await supabase
