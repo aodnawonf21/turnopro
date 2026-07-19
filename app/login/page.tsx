@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { signIn } from '@/app/actions/auth';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -16,7 +17,6 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Simulate login
       if (!email || !password) {
         setError('Por favor completa todos los campos');
         return;
@@ -25,10 +25,14 @@ export default function LoginPage() {
         setError('Por favor ingresa un email válido');
         return;
       }
-      // In a real app, you'd call an API here
-      setTimeout(() => {
-        alert('Login exitoso');
-      }, 500);
+
+      const result = await signIn(email, password);
+      if (result?.error) {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError('Ocurrió un error. Por favor intenta de nuevo.');
+      console.error(err);
     } finally {
       setLoading(false);
     }

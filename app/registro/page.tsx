@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { signUp } from '@/app/actions/auth';
 
 export default function RegistroPage() {
   const [formData, setFormData] = useState({
@@ -50,10 +51,20 @@ export default function RegistroPage() {
         setError('Debes aceptar los términos y condiciones');
         return;
       }
-      // In a real app, you'd call an API here
-      setTimeout(() => {
-        alert('Registro exitoso. Bienvenido a TurnoPro!');
-      }, 500);
+
+      const result = await signUp({
+        businessName: formData.businessName,
+        email: formData.email,
+        password: formData.password,
+        businessType: formData.businessType,
+      });
+
+      if (result?.error) {
+        setError(result.error);
+      }
+    } catch (err) {
+      setError('Ocurrió un error. Por favor intenta de nuevo.');
+      console.error(err);
     } finally {
       setLoading(false);
     }

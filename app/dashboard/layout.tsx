@@ -1,11 +1,21 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { getSession } from '@/app/actions/auth';
+import { redirect } from 'next/navigation';
+import LogoutButton from '@/components/logout-button';
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Only enforce authentication if Supabase is configured
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const session = await getSession();
+    if (!session) {
+      redirect('/login');
+    }
+  }
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
@@ -53,6 +63,13 @@ export default function DashboardLayout({
             Personal
           </Link>
           <Link
+            href="/dashboard/horarios"
+            className="flex items-center gap-3 px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium"
+          >
+            <span className="text-xl">🕐</span>
+            Horarios
+          </Link>
+          <Link
             href="/dashboard/settings"
             className="flex items-center gap-3 px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium"
           >
@@ -71,9 +88,7 @@ export default function DashboardLayout({
               </Button>
             </Link>
           </div>
-          <button className="w-full py-2 text-left text-gray-700 hover:text-black font-medium transition-colors text-sm">
-            Cerrar sesión
-          </button>
+          <LogoutButton />
         </div>
       </aside>
 
