@@ -1,11 +1,18 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { getSession } from '@/app/actions/auth';
+import { redirect } from 'next/navigation';
+import LogoutButton from '@/components/logout-button';
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getSession();
+  if (!session) {
+    redirect('/login');
+  }
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
@@ -78,9 +85,7 @@ export default function DashboardLayout({
               </Button>
             </Link>
           </div>
-          <button className="w-full py-2 text-left text-gray-700 hover:text-black font-medium transition-colors text-sm">
-            Cerrar sesión
-          </button>
+          <LogoutButton />
         </div>
       </aside>
 
