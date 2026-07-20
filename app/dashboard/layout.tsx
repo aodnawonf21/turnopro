@@ -11,11 +11,8 @@ export default async function DashboardLayout({
 }) {
   // Only enforce authentication if Supabase is configured
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    console.log("[v0] DashboardLayout: checking session");
     const session = await getSession();
-    console.log("[v0] DashboardLayout: session =", session ? "EXISTS" : "NULL");
     if (!session) {
-      console.log("[v0] DashboardLayout: REDIRECTING TO /login");
       redirect('/login');
     }
 

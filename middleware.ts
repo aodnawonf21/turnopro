@@ -2,7 +2,6 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 export async function middleware(request: NextRequest) {
-  console.log("[v0] Middleware: processing request to", request.nextUrl.pathname);
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -11,7 +10,6 @@ export async function middleware(request: NextRequest) {
 
   // Only process Supabase auth if env vars are configured
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    console.log("[v0] Middleware: creating Supabase client");
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -21,7 +19,6 @@ export async function middleware(request: NextRequest) {
             return request.cookies.getAll()
           },
           setAll(cookiesToSet) {
-            console.log("[v0] Middleware: setting cookies");
             cookiesToSet.forEach(({ name, value, options }) =>
               response.cookies.set(name, value, options)
             )
@@ -30,12 +27,9 @@ export async function middleware(request: NextRequest) {
       }
     )
 
-    console.log("[v0] Middleware: calling getSession");
     await supabase.auth.getSession()
-    console.log("[v0] Middleware: getSession completed");
   }
 
-  console.log("[v0] Middleware: returning response");
   return response
 }
 

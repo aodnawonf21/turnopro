@@ -25,7 +25,6 @@ export default function AppointmentForm({
   onSubmit,
   onClose,
 }: AppointmentFormProps) {
-  console.log("[v0] AppointmentForm rendered");
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [formData, setFormData] = useState({
