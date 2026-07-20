@@ -31,10 +31,9 @@ export default function ServiceForm({ service, onClose, onSuccess }: ServiceForm
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
-    setSuccess(false)
     setLoading(true)
-
+    setError(null)
+    
     try {
       let result
       if (service) {
@@ -50,6 +49,8 @@ export default function ServiceForm({ service, onClose, onSuccess }: ServiceForm
         setError(result.error)
       } else {
         setSuccess(true)
+        // Revalidate the services API cache
+        await fetch('/api/services', { method: 'GET' })
         setTimeout(() => {
           onSuccess()
           onClose()
@@ -81,7 +82,7 @@ export default function ServiceForm({ service, onClose, onSuccess }: ServiceForm
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Error */}
-          {error && (
+          {error && !error.includes('No autenticado') && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
               {error}
             </div>

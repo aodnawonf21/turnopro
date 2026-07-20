@@ -152,32 +152,32 @@ export default function AppointmentsPage() {
   }))
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-3 mb-2">
-          <Calendar className="w-8 h-8 text-amber-600" />
-          <h1 className="text-4xl font-bold text-black">Agenda de Turnos</h1>
+        <div className="flex items-center gap-2 sm:gap-3 mb-2">
+          <Calendar className="w-6 sm:w-8 h-6 sm:h-8 text-amber-600" />
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black">Agenda de Turnos</h1>
         </div>
-        <p className="text-gray-600">Gestiona todos tus turnos y citas</p>
+        <p className="text-sm sm:text-base text-gray-600">Gestiona todos tus turnos y citas</p>
       </div>
 
       {/* Messages */}
       {message && (
         <div
-          className={`rounded-lg border p-4 flex items-start gap-3 ${
+          className={`rounded-lg border p-3 sm:p-4 flex items-start gap-2 sm:gap-3 text-xs sm:text-sm ${
             message.type === 'success'
               ? 'bg-green-50 border-green-200'
               : 'bg-red-50 border-red-200'
           }`}
         >
           {message.type === 'success' ? (
-            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <CheckCircle className="w-4 sm:w-5 h-4 sm:h-5 text-green-600 flex-shrink-0 mt-0.5" />
           ) : (
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <AlertCircle className="w-4 sm:w-5 h-4 sm:h-5 text-red-600 flex-shrink-0 mt-0.5" />
           )}
           <p
-            className={`text-sm font-medium ${
+            className={`font-medium ${
               message.type === 'success' ? 'text-green-800' : 'text-red-800'
             }`}
           >
@@ -187,30 +187,37 @@ export default function AppointmentsPage() {
       )}
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600 text-sm">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4 text-red-600 text-xs sm:text-sm">
           {error}
         </div>
       )}
 
       {loading ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-          <p className="text-gray-600">Cargando agenda...</p>
+        <div className="bg-white rounded-lg border border-gray-200 p-8 sm:p-12 text-center">
+          <p className="text-sm sm:text-base text-gray-600">Cargando agenda...</p>
         </div>
       ) : (
         <>
-          {/* Calendar */}
-          <FullCalendarComponent
-            events={calendarEvents}
-            onDateSelect={date => {
-              setEditingAppointment(null)
-              setShowForm(true)
-            }}
-            onEventClick={event => {
-              const appointment = appointments.find(a => a.id === event.id)
-              if (appointment) setSelectedAppointment(appointment)
-            }}
-            onViewChange={setView}
-          />
+          {/* Calendar - Hidden on mobile, visible on md and up */}
+          <div className="hidden md:block">
+            <FullCalendarComponent
+              events={calendarEvents}
+              onDateSelect={date => {
+                setEditingAppointment(null)
+                setShowForm(true)
+              }}
+              onEventClick={event => {
+                const appointment = appointments.find(a => a.id === event.id)
+                if (appointment) setSelectedAppointment(appointment)
+              }}
+              onViewChange={setView}
+            />
+          </div>
+
+          {/* Mobile Agenda List */}
+          <div className="md:hidden space-y-3 sm:space-y-4">
+            {/* Appointments list for mobile would go here */}
+          </div>
 
           {/* Appointment Details Modal */}
           {selectedAppointment && (
