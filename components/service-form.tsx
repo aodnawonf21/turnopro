@@ -45,13 +45,9 @@ export default function ServiceForm({ service, onClose, onSuccess }: ServiceForm
         result = await createService(formData)
       }
 
-      console.error('[v0] Service action result:', { error: result?.error, message: result?.message, isDev: result?.isDevelopment })
-
       if (result?.error) {
-        console.error('[v0] Setting error:', result.error)
         setError(result.error)
       } else {
-        console.error('[v0] Service created successfully, showing success message')
         setSuccess(true)
         // Revalidate the services API cache
         await fetch('/api/services', { method: 'GET' })

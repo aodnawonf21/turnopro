@@ -75,8 +75,6 @@ export async function createService(formData: {
   
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || !session?.id) {
     // Development mode or no session - use in-memory storage
-    console.error('[v0] Using dev storage: Supabase configured:', !!process.env.NEXT_PUBLIC_SUPABASE_URL, 'Session exists:', !!session?.id)
-    
     const newService: Service = {
       id: 'service-' + Date.now(),
       business_id: 'dev-business-1',
@@ -95,14 +93,12 @@ export async function createService(formData: {
     return { 
       data: newService,
       message: 'Servicio creado exitosamente',
-      isDevelopment: true,
-      debugInfo: !session?.id ? 'Sin sesión de Supabase' : undefined
+      isDevelopment: true
     }
   }
 
   // Supabase is configured and user is authenticated - use real database
   const supabase = await createClient()
-  console.error('[v0] Creating service in Supabase for user:', session.id)
 
   // Get user's business
   const { data: business, error: businessError } = await supabase
@@ -112,21 +108,12 @@ export async function createService(formData: {
     .single()
 
   if (businessError) {
-    console.error('[v0] Business query error:', businessError)
     return { error: `Error al obtener negocio: ${businessError.message}` }
   }
 
   if (!business) {
-    console.error('[v0] No business found for owner:', session.id)
     return { error: 'No se encontró el negocio del usuario' }
   }
-
-  console.error('[v0] Attempting insert with:', {
-    business_id: business.id,
-    name: formData.name,
-    duration: formData.duration,
-    price: formData.price
-  })
 
   const { data, error } = await supabase
     .from('services')
@@ -142,18 +129,8 @@ export async function createService(formData: {
     .single()
 
   if (error) {
-    const fullErrorInfo = {
-      message: error.message,
-      code: error.code,
-      hint: error.hint,
-      details: error.details,
-      status: error.status
-    }
-    console.error('[v0] Supabase insert failed:', fullErrorInfo)
-    return { error: `Error en Supabase: ${error.message}` }
+    return { error: `Error al crear servicio: ${error.message}` }
   }
-
-  console.error('[v0] Service created successfully in Supabase:', data)
   revalidatePath('/dashboard/services')
   return { data: data as Service, message: 'Servicio creado exitosamente en Supabase' }
 }

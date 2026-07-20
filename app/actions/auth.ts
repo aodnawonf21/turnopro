@@ -178,7 +178,6 @@ export async function ensureBusiness() {
       .maybeSingle()
 
     if (checkError && checkError.code !== 'PGRST116') {
-      console.error('[v0] Error checking business:', checkError)
       return { error: 'Error al verificar el negocio' }
     }
 
@@ -188,8 +187,6 @@ export async function ensureBusiness() {
     }
 
     // Business doesn't exist - create one
-    console.error('[v0] Creating business for user:', userId)
-    
     const { data: newBusiness, error: createError } = await supabase
       .from('businesses')
       .insert({
@@ -202,14 +199,11 @@ export async function ensureBusiness() {
       .single()
 
     if (createError) {
-      console.error('[v0] Error creating business:', createError)
       return { error: 'Error al crear el negocio: ' + createError.message }
     }
 
-    console.error('[v0] Business created successfully:', newBusiness.id)
     return { success: true, businessId: newBusiness.id }
   } catch (error) {
-    console.error('[v0] Unexpected error in ensureBusiness:', error)
     return { error: 'Error inesperado' }
   }
 }
