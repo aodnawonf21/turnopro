@@ -216,6 +216,8 @@ export default function AppointmentsPage() {
 
           {/* Mobile Agenda List */}
           <div className="md:hidden space-y-3 sm:space-y-4">
+            {/* Appointments list for mobile would go here */}
+          </div>
 
           {/* Appointment Details Modal */}
           {selectedAppointment && (
