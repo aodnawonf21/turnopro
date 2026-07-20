@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { getSession } from '@/app/actions/auth';
+import { getSession, completeOnboarding } from '@/app/actions/auth';
 import { redirect } from 'next/navigation';
 import LogoutButton from '@/components/logout-button';
 
@@ -15,6 +15,9 @@ export default async function DashboardLayout({
     if (!session) {
       redirect('/login');
     }
+
+    // Complete onboarding if needed (idempotent)
+    await completeOnboarding();
   }
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -78,16 +81,7 @@ export default async function DashboardLayout({
           </Link>
         </nav>
 
-        <div className="absolute bottom-6 left-6 right-6 space-y-2">
-          <div className="bg-gradient-to-br from-amber-50 to-white rounded-lg border border-amber-200 p-4">
-            <h4 className="font-bold text-black text-sm mb-2">Plan Starter</h4>
-            <p className="text-xs text-gray-600 mb-3">45 de 50 citas usadas este mes</p>
-            <Link href="/dashboard/settings?tab=billing">
-              <Button size="sm" className="w-full bg-accent hover:bg-amber-600 text-white text-xs">
-                Actualizar plan
-              </Button>
-            </Link>
-          </div>
+        <div className="absolute bottom-6 left-6 right-6">
           <LogoutButton />
         </div>
       </aside>
