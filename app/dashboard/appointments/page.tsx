@@ -314,10 +314,13 @@ export default function AppointmentsPage() {
             <button
               type="button"
               onClick={(e) => {
+                console.log("[v0] Nuevo Turno button clicked");
                 e.preventDefault()
                 e.stopPropagation()
+                console.log("[v0] Setting state: editingAppointment=null, showForm=true");
                 setEditingAppointment(null)
                 setShowForm(true)
+                console.log("[v0] State set complete");
               }}
               className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors"
             >
@@ -328,9 +331,11 @@ export default function AppointmentsPage() {
 
           {/* Form Modal */}
           {showForm && (
-            <AppointmentForm
-              services={services}
-              selectedDate={new Date().toISOString().split('T')[0]}
+            <>
+              {console.log("[v0] Rendering AppointmentForm modal, showForm=true")}
+              <AppointmentForm
+                services={services}
+                selectedDate={new Date().toISOString().split('T')[0]}
               appointment={editingAppointment}
               businessHours={businessHours}
               onSubmit={editingAppointment ? handleEditAppointment : handleCreateAppointment}
@@ -339,7 +344,8 @@ export default function AppointmentsPage() {
                 setEditingAppointment(null)
               }}
             />
-          )}
+              </>
+            )}
         </>
       )}
     </div>
