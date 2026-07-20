@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { redirect } from 'next/navigation';
 import LogoutButton from '@/components/logout-button';
+import { BusinessInitializer } from '@/components/business-initializer';
 import { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, LogOut } from 'lucide-react';
@@ -64,6 +65,8 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+      <BusinessInitializer />
+      
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex lg:w-64 bg-white border-r border-gray-200 flex-col">
         <SidebarContent />
