@@ -1,32 +1,23 @@
 import { createClient } from '@/lib/supabase/server'
+import { getDevServices } from '@/lib/dev-services'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
-  // Check if Supabase is configured
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    // Development mode without Supabase - return empty services
-    return NextResponse.json({
-      data: [],
-      hasServices: false,
-      isDevelopment: true,
-    })
-  }
-
   const supabase = await createClient()
   
   const {
     data: { session },
   } = await supabase.auth.getSession()
 
-  if (!session?.user?.id) {
-    return NextResponse.json(
-      { 
-        data: [],
-        hasServices: false,
-        error: 'No autenticado' 
-      },
-      { status: 200 }
-    )
+  // Check if Supabase is configured AND user is authenticated
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || !session?.user?.id) {
+    // Development mode or no session - return dev services
+    const devServices = getDevServices()
+    return NextResponse.json({
+      data: devServices,
+      hasServices: devServices.length > 0,
+      isDevelopment: true,
+    })
   }
 
   try {
@@ -44,7 +35,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get services
+    // Get services from Supabase
     const { data: services, error: servicesError } = await supabase
       .from('services')
       .select('*')
@@ -52,6 +43,7 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
 
     if (servicesError) {
+      console.error('[v0] Error fetching services:', servicesError)
       return NextResponse.json(
         { 
           data: [],
@@ -67,6 +59,7 @@ export async function GET(request: NextRequest) {
       hasServices: (services?.length ?? 0) > 0,
     })
   } catch (error) {
+    console.error('[v0] Error in services API:', error)
     return NextResponse.json(
       { 
         data: [],

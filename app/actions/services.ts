@@ -19,15 +19,12 @@ export interface Service {
 
 // Get all services for a business
 export async function getServices() {
-  // Check if Supabase is configured
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    // Development mode - return mock services from memory
-    return { data: getDevServices() }
-  }
-
   const session = await getSession()
-  if (!session?.id) {
-    return { error: 'No autenticado' }
+  
+  // Check if Supabase is configured AND user is authenticated
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || !session?.id) {
+    // Development mode or no session - return services from memory
+    return { data: getDevServices() }
   }
 
   const supabase = await createClient()
@@ -73,34 +70,11 @@ export async function createService(formData: {
     return { error: 'El precio no puede ser negativo' }
   }
 
-  // Check if Supabase is configured
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    // Development mode without Supabase - persist in memory
-    const newService: Service = {
-      id: 'service-' + Date.now(),
-      business_id: 'dev-business-1',
-      name: formData.name,
-      description: formData.description,
-      duration: formData.duration,
-      price: formData.price,
-      is_active: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-    
-    addDevService(newService)
-    revalidatePath('/dashboard/services')
-    
-    return { 
-      data: newService,
-      message: 'Servicio creado exitosamente'
-    }
-  }
-
+  // Check if Supabase is configured AND user is authenticated
   const session = await getSession()
-  if (!session?.id) {
-    // Fallback: if session is null but Supabase is configured, use dev storage
-    // This handles edge cases where session cookie isn't being passed correctly
+  
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || !session?.id) {
+    // Development mode or no session - use in-memory storage
     const newService: Service = {
       id: 'service-' + Date.now(),
       business_id: 'dev-business-1',
@@ -118,10 +92,12 @@ export async function createService(formData: {
     
     return { 
       data: newService,
-      message: 'Servicio creado exitosamente'
+      message: 'Servicio creado exitosamente',
+      isDevelopment: true
     }
   }
 
+  // Supabase is configured and user is authenticated - use real database
   const supabase = await createClient()
 
   // Get user's business
@@ -131,11 +107,14 @@ export async function createService(formData: {
     .eq('owner_id', session.id)
     .single()
 
-  if (businessError || !business) {
-    return { error: 'No se encontró el negocio' }
+  if (businessError) {
+    return { error: `Error al obtener negocio: ${businessError.message}` }
   }
 
-  // Create service
+  if (!business) {
+    return { error: 'No se encontró el negocio del usuario' }
+  }
+
   const { data, error } = await supabase
     .from('services')
     .insert({
@@ -150,11 +129,10 @@ export async function createService(formData: {
     .single()
 
   if (error) {
-    return { error: 'Error al crear servicio: ' + error.message }
+    return { error: `Error al crear servicio: ${error.message}` }
   }
-
   revalidatePath('/dashboard/services')
-  return { data: data as Service, message: 'Servicio creado exitosamente' }
+  return { data: data as Service, message: 'Servicio creado exitosamente en Supabase' }
 }
 
 // Update service
@@ -174,20 +152,17 @@ export async function updateService(id: string, formData: {
     return { error: 'El precio no puede ser negativo' }
   }
 
-  // Check if Supabase is configured
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    // Development mode - update in memory
+  const session = await getSession()
+
+  // Check if Supabase is configured AND user is authenticated
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || !session?.id) {
+    // Development mode or no session - update in memory
     const updated = updateDevService(id, formData)
     if (!updated) {
       return { error: 'Servicio no encontrado' }
     }
     revalidatePath('/dashboard/services')
     return { data: updated, message: 'Servicio actualizado exitosamente' }
-  }
-
-  const session = await getSession()
-  if (!session?.id) {
-    return { error: 'No autenticado' }
   }
 
   const supabase = await createClient()
@@ -238,20 +213,17 @@ export async function updateService(id: string, formData: {
 
 // Toggle service status
 export async function toggleService(id: string, isActive: boolean) {
-  // Check if Supabase is configured
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    // Development mode - update in memory
+  const session = await getSession()
+
+  // Check if Supabase is configured AND user is authenticated
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || !session?.id) {
+    // Development mode or no session - update in memory
     const updated = updateDevService(id, { is_active: isActive })
     if (!updated) {
       return { error: 'Servicio no encontrado' }
     }
     revalidatePath('/dashboard/services')
     return { data: updated, message: isActive ? 'Servicio activado' : 'Servicio desactivado' }
-  }
-
-  const session = await getSession()
-  if (!session?.id) {
-    return { error: 'No autenticado' }
   }
 
   const supabase = await createClient()
@@ -298,20 +270,17 @@ export async function toggleService(id: string, isActive: boolean) {
 
 // Delete service
 export async function deleteService(id: string) {
-  // Check if Supabase is configured
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    // Development mode - delete from memory
+  const session = await getSession()
+
+  // Check if Supabase is configured AND user is authenticated
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || !session?.id) {
+    // Development mode or no session - delete from memory
     const deleted = deleteDevService(id)
     if (!deleted) {
       return { error: 'Servicio no encontrado' }
     }
     revalidatePath('/dashboard/services')
     return { message: 'Servicio eliminado exitosamente' }
-  }
-
-  const session = await getSession()
-  if (!session?.id) {
-    return { error: 'No autenticado' }
   }
 
   const supabase = await createClient()

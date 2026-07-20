@@ -151,6 +151,63 @@ export async function getSession() {
   return session
 }
 
+export async function ensureBusiness() {
+  'use server'
+  
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return { error: 'Supabase no está configurado' }
+  }
+
+  const supabase = await createClient()
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  if (!session?.user?.id) {
+    return { error: 'No hay sesión activa' }
+  }
+
+  const userId = session.user.id
+
+  try {
+    // Check if business exists for this user
+    const { data: existingBusiness, error: checkError } = await supabase
+      .from('businesses')
+      .select('id')
+      .eq('owner_id', userId)
+      .maybeSingle()
+
+    if (checkError && checkError.code !== 'PGRST116') {
+      return { error: 'Error al verificar el negocio' }
+    }
+
+    // Business already exists
+    if (existingBusiness) {
+      return { success: true, businessId: existingBusiness.id }
+    }
+
+    // Business doesn't exist - create one
+    const { data: newBusiness, error: createError } = await supabase
+      .from('businesses')
+      .insert({
+        name: 'Mi Negocio',
+        slug: `negocio-${userId.slice(0, 8)}`,
+        business_type: 'servicios',
+        owner_id: userId,
+      })
+      .select()
+      .single()
+
+    if (createError) {
+      return { error: 'Error al crear el negocio: ' + createError.message }
+    }
+
+    return { success: true, businessId: newBusiness.id }
+  } catch (error) {
+    return { error: 'Error inesperado' }
+  }
+}
+
 export async function completeOnboarding() {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     return { error: 'Supabase no está configurado' }
