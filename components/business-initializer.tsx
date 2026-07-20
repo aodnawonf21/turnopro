@@ -1,24 +1,26 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { ensureBusiness } from '@/app/actions/auth'
 
 export function BusinessInitializer() {
-  useEffect(() => {
-    const initializeBusiness = async () => {
-      try {
-        const result = await ensureBusiness()
-        if (result?.error) {
-          console.error('[v0] Failed to initialize business:', result.error)
-        } else {
-          console.error('[v0] Business initialized:', result?.businessId)
-        }
-      } catch (error) {
-        console.error('[v0] Error initializing business:', error)
-      }
-    }
+  const hasInitialized = useRef(false)
 
-    initializeBusiness()
+  useEffect(() => {
+    // Prevent double initialization and race conditions during HMR
+    if (hasInitialized.current) return
+    hasInitialized.current = true
+
+    // Delay to ensure router is initialized
+    const timer = setTimeout(async () => {
+      try {
+        await ensureBusiness()
+      } catch (error) {
+        // Silently fail - user can still work with dev storage
+      }
+    }, 0)
+
+    return () => clearTimeout(timer)
   }, [])
 
   return null
