@@ -310,9 +310,12 @@ export default function AppointmentsPage() {
           )}
 
           {/* Button to create appointment */}
-          <div className="flex justify-end">
+          <div className="flex justify-end" style={{ pointerEvents: 'auto' }}>
             <button
-              onClick={() => {
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
                 setEditingAppointment(null)
                 setShowForm(true)
               }}
