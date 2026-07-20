@@ -160,4 +160,13 @@
   body {
     @apply bg-background text-foreground;
   }
+  input,
+  textarea,
+  select {
+    @apply text-gray-900 placeholder:text-gray-400 caret-gray-900;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-gray-400;
+  }
 }
