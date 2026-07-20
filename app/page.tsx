@@ -38,14 +38,16 @@ export default async function Home() {
             Simplifica la reserva de citas para tu negocio. Barbershops, salones de belleza, spas y más.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
-            <Link href="/registro">
+            <Link href="/reservar">
               <Button size="lg" className="bg-accent hover:bg-amber-600 text-white">
-                Comienza gratis
+                Agendar cita
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="border-gray-300 text-black hover:bg-gray-50">
-              Ver demo
-            </Button>
+            <Link href="/registro">
+              <Button size="lg" variant="outline" className="border-gray-300 text-black hover:bg-gray-50">
+                Gestionar negocio
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
