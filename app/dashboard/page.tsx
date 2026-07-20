@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import PlanCard from '@/components/plan-card';
 import { useState } from 'react';
 
 export default function DashboardPage() {
@@ -26,9 +27,14 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-4xl font-bold text-black mb-2">Hoy</h1>
-        <p className="text-gray-600">Aquí está tu agenda del día</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold text-black mb-2">Hoy</h1>
+          <p className="text-gray-600">Aquí está tu agenda del día</p>
+        </div>
+        <div className="w-64">
+          <PlanCard />
+        </div>
       </div>
 
       {/* Stats Cards */}
