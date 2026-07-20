@@ -52,6 +52,15 @@ export async function signUp(formData: {
     return { error: 'No se pudo crear el usuario' }
   }
 
+  // Check if email verification is required
+  if (data.user.user_metadata?.email_verified === false && !data.session) {
+    // Email verification required - stop here and show success message
+    return {
+      success: true,
+      message: 'Tus datos fueron registrados correctamente. Te enviamos un correo de verificación a tu email.\n\n📧 Revisá tu bandeja de entrada (y la carpeta de spam si no lo encontrás).\n\nUna vez que confirmes tu correo, podrás iniciar sesión.'
+    }
+  }
+
   // Generate slug from business name
   const slug = formData.businessName
     .toLowerCase()
@@ -64,7 +73,7 @@ export async function signUp(formData: {
   const profileExists = await waitForProfile(data.user.id)
   
   if (!profileExists) {
-    return { error: 'El perfil no se pudo crear automáticamente. Por favor intenta registrarte nuevamente.' }
+    return { error: 'No se pudo completar el registro. Por favor intenta nuevamente.' }
   }
 
   // Create business
