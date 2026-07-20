@@ -51,36 +51,36 @@ export default function ServicesPage() {
   const totalRevenue = services.filter(s => s.is_active).reduce((sum, s) => sum + s.price, 0)
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-3 mb-2">
-          <Briefcase className="w-8 h-8 text-amber-600" />
-          <h1 className="text-4xl font-bold text-black">Servicios</h1>
+        <div className="flex items-center gap-2 sm:gap-3 mb-2">
+          <Briefcase className="w-6 sm:w-8 h-6 sm:h-8 text-amber-600" />
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black">Servicios</h1>
         </div>
-        <p className="text-gray-600">Gestiona los servicios que ofrece tu negocio</p>
+        <p className="text-sm sm:text-base text-gray-600">Gestiona los servicios que ofrece tu negocio</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <p className="text-sm text-gray-600 uppercase font-medium mb-2">Total de servicios</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm">
+          <p className="text-xs sm:text-sm text-gray-600 uppercase font-medium mb-2">Total de servicios</p>
           <div className="flex items-baseline gap-2">
-            <p className="text-3xl font-bold text-black">{services.length}</p>
-            <p className="text-sm text-gray-500">servicios</p>
+            <p className="text-2xl sm:text-3xl font-bold text-black">{services.length}</p>
+            <p className="text-xs sm:text-sm text-gray-500">servicios</p>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <p className="text-sm text-gray-600 uppercase font-medium mb-2">Activos</p>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm">
+          <p className="text-xs sm:text-sm text-gray-600 uppercase font-medium mb-2">Activos</p>
           <div className="flex items-baseline gap-2">
-            <p className="text-3xl font-bold text-green-600">{activeCount}</p>
-            <p className="text-sm text-gray-500">disponibles</p>
+            <p className="text-2xl sm:text-3xl font-bold text-green-600">{activeCount}</p>
+            <p className="text-xs sm:text-sm text-gray-500">disponibles</p>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <p className="text-sm text-gray-600 uppercase font-medium mb-2">Precio promedio</p>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm sm:col-span-2 md:col-span-1">
+          <p className="text-xs sm:text-sm text-gray-600 uppercase font-medium mb-2">Precio promedio</p>
           <div className="flex items-baseline gap-2">
-            <p className="text-3xl font-bold text-black">
+            <p className="text-2xl sm:text-3xl font-bold text-black">
               ${activeCount > 0 ? (totalRevenue / activeCount).toFixed(2) : '0.00'}
             </p>
           </div>
@@ -101,13 +101,13 @@ export default function ServicesPage() {
         </div>
       ) : services.length === 0 ? (
         /* Empty State */
-        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-          <Briefcase className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-black mb-2">No hay servicios</h3>
-          <p className="text-gray-600 mb-6">Crea tu primer servicio para comenzar</p>
+        <div className="bg-white rounded-lg border border-gray-200 p-8 sm:p-12 text-center">
+          <Briefcase className="w-10 sm:w-12 h-10 sm:h-12 text-gray-300 mx-auto mb-3 sm:mb-4" />
+          <h3 className="text-base sm:text-lg font-semibold text-black mb-2">No hay servicios</h3>
+          <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">Crea tu primer servicio para comenzar</p>
           <button
             onClick={() => handleOpenForm()}
-            className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors w-full sm:w-auto justify-center"
           >
             <Plus className="w-4 h-4" />
             Crear servicio
@@ -117,19 +117,19 @@ export default function ServicesPage() {
         /* Services Grid */
         <>
           {/* Create Button */}
-          <div className="flex justify-end">
+          <div className="flex justify-center sm:justify-end">
             <button
               onClick={() => handleOpenForm()}
-              className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors"
+              className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors w-full sm:w-auto justify-center"
             >
               <Plus className="w-4 h-4" />
               Nuevo servicio
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="hidden sm:block w-4 h-4" />
             </button>
           </div>
 
           {/* Services Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-6">
             {services.map(service => (
               <ServiceCard
                 key={service.id}
