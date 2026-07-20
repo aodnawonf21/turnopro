@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { getSession } from '@/app/actions/auth';
+import { getSession, completeOnboarding } from '@/app/actions/auth';
 import { redirect } from 'next/navigation';
 import LogoutButton from '@/components/logout-button';
 
@@ -15,6 +15,9 @@ export default async function DashboardLayout({
     if (!session) {
       redirect('/login');
     }
+
+    // Complete onboarding if needed (idempotent)
+    await completeOnboarding();
   }
   return (
     <div className="min-h-screen bg-gray-50 flex">
