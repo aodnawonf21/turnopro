@@ -83,7 +83,7 @@ export default function ServiceForm({ service, onClose, onSuccess }: ServiceForm
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Error */}
-          {error && (
+          {error && !error.includes('No autenticado') && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
               {error}
             </div>

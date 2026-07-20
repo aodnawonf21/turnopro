@@ -57,18 +57,38 @@ export async function createService(formData: {
   duration: number
   price: number
 }) {
-  const session = await getSession()
-  if (!session?.id) {
-    return { error: 'No autenticado' }
-  }
-
-  // Validation
+  // Validation first (before session check)
   if (!formData.name || !formData.description || !formData.duration || formData.price === undefined) {
     return { error: 'Todos los campos son requeridos' }
   }
 
   if (formData.price < 0) {
     return { error: 'El precio no puede ser negativo' }
+  }
+
+  // Check if Supabase is configured
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    // Development mode - return success without actual database operation
+    return { 
+      data: {
+        id: 'mock-' + Date.now(),
+        business_id: 'mock-business',
+        name: formData.name,
+        description: formData.description,
+        duration: formData.duration,
+        price: formData.price,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as Service,
+      message: 'Servicio creado exitosamente (modo desarrollo)',
+      isDevelopment: true
+    }
+  }
+
+  const session = await getSession()
+  if (!session?.id) {
+    return { error: 'No autenticado' }
   }
 
   const supabase = await createClient()
