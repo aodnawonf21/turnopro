@@ -31,10 +31,9 @@ export default function ServiceForm({ service, onClose, onSuccess }: ServiceForm
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
-    setSuccess(false)
     setLoading(true)
-
+    setError(null)
+    
     try {
       let result
       if (service) {

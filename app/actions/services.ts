@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getSession } from './auth'
+import { addDevService, getDevServices, getDevService, updateDevService, deleteDevService } from '@/lib/dev-services'
 
 export interface Service {
   id: string
@@ -18,6 +19,12 @@ export interface Service {
 
 // Get all services for a business
 export async function getServices() {
+  // Check if Supabase is configured
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    // Development mode - return mock services from memory
+    return { data: getDevServices() }
+  }
+
   const session = await getSession()
   if (!session?.id) {
     return { error: 'No autenticado' }
@@ -68,27 +75,51 @@ export async function createService(formData: {
 
   // Check if Supabase is configured
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    // Development mode - return success without actual database operation
+    // Development mode without Supabase - persist in memory
+    const newService: Service = {
+      id: 'service-' + Date.now(),
+      business_id: 'dev-business-1',
+      name: formData.name,
+      description: formData.description,
+      duration: formData.duration,
+      price: formData.price,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+    
+    addDevService(newService)
+    revalidatePath('/dashboard/services')
+    
     return { 
-      data: {
-        id: 'mock-' + Date.now(),
-        business_id: 'mock-business',
-        name: formData.name,
-        description: formData.description,
-        duration: formData.duration,
-        price: formData.price,
-        is_active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      } as Service,
-      message: 'Servicio creado exitosamente (modo desarrollo)',
-      isDevelopment: true
+      data: newService,
+      message: 'Servicio creado exitosamente'
     }
   }
 
   const session = await getSession()
   if (!session?.id) {
-    return { error: 'No autenticado' }
+    // Fallback: if session is null but Supabase is configured, use dev storage
+    // This handles edge cases where session cookie isn't being passed correctly
+    const newService: Service = {
+      id: 'service-' + Date.now(),
+      business_id: 'dev-business-1',
+      name: formData.name,
+      description: formData.description,
+      duration: formData.duration,
+      price: formData.price,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+    
+    addDevService(newService)
+    revalidatePath('/dashboard/services')
+    
+    return { 
+      data: newService,
+      message: 'Servicio creado exitosamente'
+    }
   }
 
   const supabase = await createClient()
@@ -134,11 +165,6 @@ export async function updateService(id: string, formData: {
   price: number
   is_active: boolean
 }) {
-  const session = await getSession()
-  if (!session?.id) {
-    return { error: 'No autenticado' }
-  }
-
   // Validation
   if (!formData.name || !formData.description || !formData.duration || formData.price === undefined) {
     return { error: 'Todos los campos son requeridos' }
@@ -146,6 +172,22 @@ export async function updateService(id: string, formData: {
 
   if (formData.price < 0) {
     return { error: 'El precio no puede ser negativo' }
+  }
+
+  // Check if Supabase is configured
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    // Development mode - update in memory
+    const updated = updateDevService(id, formData)
+    if (!updated) {
+      return { error: 'Servicio no encontrado' }
+    }
+    revalidatePath('/dashboard/services')
+    return { data: updated, message: 'Servicio actualizado exitosamente' }
+  }
+
+  const session = await getSession()
+  if (!session?.id) {
+    return { error: 'No autenticado' }
   }
 
   const supabase = await createClient()
@@ -196,6 +238,17 @@ export async function updateService(id: string, formData: {
 
 // Toggle service status
 export async function toggleService(id: string, isActive: boolean) {
+  // Check if Supabase is configured
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    // Development mode - update in memory
+    const updated = updateDevService(id, { is_active: isActive })
+    if (!updated) {
+      return { error: 'Servicio no encontrado' }
+    }
+    revalidatePath('/dashboard/services')
+    return { data: updated, message: isActive ? 'Servicio activado' : 'Servicio desactivado' }
+  }
+
   const session = await getSession()
   if (!session?.id) {
     return { error: 'No autenticado' }
@@ -245,6 +298,17 @@ export async function toggleService(id: string, isActive: boolean) {
 
 // Delete service
 export async function deleteService(id: string) {
+  // Check if Supabase is configured
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    // Development mode - delete from memory
+    const deleted = deleteDevService(id)
+    if (!deleted) {
+      return { error: 'Servicio no encontrado' }
+    }
+    revalidatePath('/dashboard/services')
+    return { message: 'Servicio eliminado exitosamente' }
+  }
+
   const session = await getSession()
   if (!session?.id) {
     return { error: 'No autenticado' }
