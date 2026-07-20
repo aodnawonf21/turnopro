@@ -3,9 +3,12 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import PlanCard from '@/components/plan-card';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useServices } from '@/hooks/useServices';
 
 export default function DashboardPage() {
+  const { hasServices, loading: servicesLoading } = useServices();
+  
   const [appointments, setAppointments] = useState([
     { id: 1, time: '09:00', client: 'Juan García', service: 'Corte y barba', status: 'Confirmada', staff: 'Carlos' },
     { id: 2, time: '10:15', client: 'María López', service: 'Peinado', status: 'Confirmada', staff: 'Ana' },
@@ -26,6 +29,25 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 sm:space-y-8">
+      {/* Onboarding Alert */}
+      {!servicesLoading && !hasServices && (
+        <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex-1">
+              <h3 className="text-base sm:text-lg font-bold text-amber-900 mb-1">Bienvenido a TurnoPro</h3>
+              <p className="text-sm sm:text-base text-amber-800 mb-3 sm:mb-0">
+                Para comenzar, primero necesitas crear al menos un servicio. Una vez que lo hagas, podrás gestionar citas, reservas y mucho más.
+              </p>
+            </div>
+            <Link href="/dashboard/services" className="flex-shrink-0">
+              <Button className="bg-amber-600 hover:bg-amber-700 text-white w-full sm:w-auto whitespace-nowrap">
+                Crear mi primer servicio
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-0">
         <div>
@@ -65,7 +87,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Agenda del día */}
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+      <div className={`bg-white border rounded-lg shadow-sm overflow-hidden ${!hasServices ? 'border-gray-200 opacity-50 pointer-events-none' : 'border-gray-200'}`}>
         <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
           <h2 className="text-lg sm:text-xl font-bold text-black">Agenda del día</h2>
         </div>
@@ -198,7 +220,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Stats Footer */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+      <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 ${!hasServices ? 'opacity-50 pointer-events-none' : ''}`}>
         <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 sm:p-6 border border-blue-200">
           <h3 className="font-semibold text-gray-900 mb-1 sm:mb-2 text-sm sm:text-base">Ocupación hoy</h3>
           <div className="flex items-end gap-2">

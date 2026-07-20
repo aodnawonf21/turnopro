@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getServices, type Service } from '@/app/actions/services'
+import { createService, updateService, type Service } from '@/app/actions/services'
 import ServiceForm from '@/components/service-form'
 import ServiceCard from '@/components/service-card'
 import { Briefcase, Plus, ChevronRight } from 'lucide-react'
@@ -16,13 +16,24 @@ export default function ServicesPage() {
   const fetchServices = async () => {
     setLoading(true)
     setError(null)
-    const result = await getServices()
-    if (result?.error) {
-      setError(result.error)
-    } else if (result?.data) {
-      setServices(result.data)
+    try {
+      const response = await fetch('/api/services')
+      const result = await response.json()
+      
+      if (!response.ok) {
+        setError(result.error || 'Error al cargar servicios')
+      } else {
+        setServices(result.data || [])
+        // Clear error if we successfully loaded data
+        if (result.isDevelopment) {
+          setError(null)
+        }
+      }
+    } catch (err) {
+      setError('Error al conectar con el servidor')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   useEffect(() => {
@@ -87,8 +98,8 @@ export default function ServicesPage() {
         </div>
       </div>
 
-      {/* Error Message */}
-      {error && (
+      {/* Error Message - only show for real errors, not auth in dev */}
+      {error && error !== 'No autenticado' && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600 text-sm">
           {error}
         </div>

@@ -50,6 +50,8 @@ export default function ServiceForm({ service, onClose, onSuccess }: ServiceForm
         setError(result.error)
       } else {
         setSuccess(true)
+        // Revalidate the services API cache
+        await fetch('/api/services', { method: 'GET' })
         setTimeout(() => {
           onSuccess()
           onClose()
